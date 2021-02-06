@@ -62,7 +62,7 @@ class RechargeWalletUseCaseImplTest {
 
         WalletErrorException exception = assertThrows(WalletErrorException.class,
                 () -> useCase.recharge(UUID.randomUUID().toString(), new BigDecimal(-1)));
-        assertEquals(WalletError.INVALID_CHARGE_VALUE, exception.getError());
+        assertEquals(WalletError.INVALID_RECHARGE_VALUE, exception.getError());
     }
 
     @Test
@@ -70,7 +70,7 @@ class RechargeWalletUseCaseImplTest {
     void makeChargeToExistingWalletWithZeroAsAmount() {
         WalletErrorException exception = assertThrows(WalletErrorException.class,
                 () -> useCase.recharge(UUID.randomUUID().toString(), BigDecimal.ZERO));
-        assertEquals(WalletError.INVALID_CHARGE_VALUE, exception.getError());
+        assertEquals(WalletError.INVALID_RECHARGE_VALUE, exception.getError());
     }
 
     @Test

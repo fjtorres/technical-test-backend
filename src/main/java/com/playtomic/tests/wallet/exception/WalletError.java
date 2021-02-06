@@ -10,8 +10,8 @@ public enum WalletError {
 
     INVALID_CHARGE_VALUE("BUS-001", "Value to charge should be a positive number greater then 0."),
     INSUFFICIENT_BALANCE("BUS-002", "Balance is not enough to make the charge."),
-    PAYMENT_ERROR("BUS-003", "Recharge cannot be completed because we found a problem to charge it to third party platform.");
-
+    PAYMENT_ERROR("BUS-003", "Recharge cannot be completed because we found a problem to charge it to third party platform."),
+    INVALID_RECHARGE_VALUE("BUS-004", "Value to recharge should be a positive number greater then 0.");
 
     final String code;
     final String message;

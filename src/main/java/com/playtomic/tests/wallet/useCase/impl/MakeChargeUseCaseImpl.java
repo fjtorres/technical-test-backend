@@ -5,6 +5,7 @@ import com.playtomic.tests.wallet.exception.WalletErrorException;
 import com.playtomic.tests.wallet.model.Wallet;
 import com.playtomic.tests.wallet.respository.WalletRepository;
 import com.playtomic.tests.wallet.useCase.MakeChargeUseCase;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
@@ -24,12 +25,12 @@ public class MakeChargeUseCaseImpl implements MakeChargeUseCase {
     @Override
     public Optional<Wallet> makeCharge(String identifier, BigDecimal amount) {
 
-        if (identifier == null || identifier.isEmpty()) {
+        if (ObjectUtils.isEmpty(identifier)) {
             throw new IllegalArgumentException("Identifier is required.");
         }
 
         if (amount == null) {
-            throw new IllegalArgumentException("Amunt is required.");
+            throw new IllegalArgumentException("Amount is required.");
         }
 
         if (BigDecimal.ZERO.equals(amount) || amount.doubleValue() < 0) {
