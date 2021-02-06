@@ -2,9 +2,11 @@ package com.playtomic.tests.wallet;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.playtomic.tests.wallet.api.WalletController;
+import com.playtomic.tests.wallet.exception.WalletError;
 import com.playtomic.tests.wallet.model.Wallet;
 import com.playtomic.tests.wallet.useCase.GetWalletUseCase;
 import com.playtomic.tests.wallet.util.ApiConstants;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -46,6 +49,7 @@ public class WalletApplicationIT {
     private ObjectMapper objectMapper;
 
     @Test
+    @DisplayName("Try to find existing wallet, status OK (200)")
     public void getWalletById() throws Exception {
 
         Optional<Wallet> wallet = getWalletUseCase.getWallet(TEST_WALLET_ID);
@@ -66,6 +70,21 @@ public class WalletApplicationIT {
     }
 
     @Test
+    @DisplayName("Try to find wallet with wrong identifier, status NOT FOUND(404)")
+    public void getWalletByWithWrongId() throws Exception {
+
+        final String testId = UUID.randomUUID().toString();
+
+        mockMvc.perform(get(ApiConstants.GET_WALLET_URL, testId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andReturn();
+    }
+
+    @Test
+    @DisplayName("Try to make a charge in existing wallet, status OK (200)")
     void makeChargeToWallet() throws Exception {
 
         Optional<Wallet> wallet = getWalletUseCase.getWallet(TEST_WALLET_ID);
@@ -97,6 +116,7 @@ public class WalletApplicationIT {
     }
 
     @Test
+    @DisplayName("Try to recharge an existing wallet, status OK (200)")
     void rechargeWallet() throws Exception {
 
         Optional<Wallet> wallet = getWalletUseCase.getWallet(TEST_WALLET_ID);
@@ -125,5 +145,31 @@ public class WalletApplicationIT {
         assertTrue(wallet.isPresent());
 
         assertEquals(expectedBalance, wallet.get().getBalance());
+    }
+
+    @Test
+    @DisplayName("Try to recharge in existing wallet with small amount to receive payment error, status BAD REQUEST (400)")
+    void rechargeWalletWithPaymentError() throws Exception {
+
+        Optional<Wallet> wallet = getWalletUseCase.getWallet(TEST_WALLET_ID);
+
+        assertTrue(wallet.isPresent());
+
+        WalletController.RechargeRequestDto request = new WalletController.RechargeRequestDto(new BigDecimal(5));
+
+        mockMvc.perform(post(ApiConstants.RECHARGE_WALLET_URL, TEST_WALLET_ID)
+                .content(objectMapper.writeValueAsString(request))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.details").exists())
+                .andExpect(jsonPath("$.details").isArray())
+                .andExpect(jsonPath("$.details[*].code").exists())
+                .andExpect(jsonPath("$.details[*].message").exists())
+                .andExpect(jsonPath("$.details[0].code").value(WalletError.PAYMENT_ERROR.getCode()))
+                .andExpect(jsonPath("$.details[0].message").value(WalletError.PAYMENT_ERROR.getMessage()))
+                .andReturn();
+
     }
 }
