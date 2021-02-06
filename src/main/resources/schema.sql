@@ -1,0 +1,4 @@
+CREATE TABLE wallet (
+  id VARCHAR2(36) PRIMARY KEY,
+  balance NUMERIC(9, 2) NOT NULL
+);
