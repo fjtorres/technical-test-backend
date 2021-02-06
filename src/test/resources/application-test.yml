@@ -1,0 +1,8 @@
+spring:
+  jpa:
+    show_sql: true
+    database: H2
+    hibernate:
+      ddl-auto: create-drop
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_ON_EXIT=FALSE;IGNORECASE=TRUE
